@@ -1,6 +1,6 @@
 # Northcoders News API
 
-You will need to create two `.env` files in this projeect's root folder in order to be able to connect to the databases locally: 
+You will need to create two `.env` files in this project's root folder in order to be able to connect to the databases locally: 
 ---
 - `.env.test`, which should contain:
 `PGDATABASE=nc_news_test`
