@@ -8,6 +8,7 @@ beforeEach(() => {
     return seed(testData);
 });
 
+// !!! ADD ERROR TESTS LATER !!!
 describe('GET /api/topics', () => {
     it('gets all topics', () => {
         return request(app).get('/api/topics')
@@ -19,7 +20,24 @@ describe('GET /api/topics', () => {
                     expect(topic).toHaveProperty('description');
                 });
             })
-        })
     })
+});
+
+// !!! ADD ERROR TESTS LATER !!!
+describe('GET /api', () => {
+    it('provides a description of all other endpoints available', () => {
+        return request(app).get('/api')
+            .expect(200).then((response) => {
+                const endpoints = response.body;
+                // Expect there to be 3 endpoints
+                expect(Object.keys(endpoints)).toHaveLength(3)
+                for (const key in endpoints){
+                    let properties = Object.keys(endpoints[key]);
+                    // Expect the first property of each endpoint to be its description
+                    expect(properties[0]).toBe('description');
+                };
+            });
+    });
+});
 
 afterAll(() => db.end());
