@@ -14,8 +14,8 @@ describe('GET /api', () => {
         return request(app).get('/api')
             .expect(200).then((response) => {
                 const endpoints = response.body;
-                // Expect there to be 3 endpoints
-                expect(Object.keys(endpoints)).toHaveLength(3)
+                // Expect there to be 4 endpoints
+                expect(Object.keys(endpoints)).toHaveLength(4)
                 for (const key in endpoints){
                     let properties = Object.keys(endpoints[key]);
                     // Expect the first property of each endpoint to be its description
