@@ -9,21 +9,6 @@ beforeEach(() => {
 });
 
 // !!! ADD ERROR TESTS LATER !!!
-describe('GET /api/topics', () => {
-    it('gets all topics', () => {
-        return request(app).get('/api/topics')
-            .expect(200).then((response) => {
-                const topics = response.body.topics;
-                expect(topics).toHaveLength(3);
-                topics.forEach((topic) => {
-                    expect(topic).toHaveProperty('slug');
-                    expect(topic).toHaveProperty('description');
-                });
-            })
-    })
-});
-
-// !!! ADD ERROR TESTS LATER !!!
 describe('GET /api', () => {
     it('provides a description of all other endpoints available', () => {
         return request(app).get('/api')
@@ -37,6 +22,44 @@ describe('GET /api', () => {
                     expect(properties[0]).toBe('description');
                 };
             });
+    });
+});
+
+// !!! ADD ERROR TESTS LATER !!!
+describe('GET /api/topics', () => {
+    it('gets all topics', () => {
+        return request(app).get('/api/topics')
+            .expect(200)
+            .then((response) => {
+                const topics = response.body.topics;
+                expect(topics).toHaveLength(3);
+                topics.forEach((topic) => {
+                    expect(topic).toHaveProperty('slug');
+                    expect(topic).toHaveProperty('description');
+                });
+            })
+    })
+});
+
+// !!! ADD ERROR TESTS LATER !!!
+describe('GET /api/articles', () => {
+    it('gets all articles', () => {
+        return request(app).get('/api/articles')
+            .expect(200).then((response) => {
+            const articles = response.body
+            console.log(articles)
+        });
+    });
+});
+
+// !!! ADD ERROR TESTS LATER !!!
+describe('GET /api/articles/:article_id', () => {
+    it('gets an article by its id', () => {
+        return request(app).get('/api/articles/1')
+            .expect(200).then((response) => {
+            const article = response.body
+            console.log(article)
+        });
     });
 });
 
