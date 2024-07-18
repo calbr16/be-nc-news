@@ -8,65 +8,112 @@ beforeEach(() => {
     return seed(testData);
 });
 
-// !!! ADD ERROR TESTS LATER !!!
 describe('GET /api', () => {
     it('provides a description of all other endpoints available', () => {
         return request(app).get('/api')
+        // Be available on endpoint /api
             .expect(200).then((response) => {
-                const endpoints = response.body;
-                // Expect there to be 4 endpoints
-                expect(Object.keys(endpoints)).toHaveLength(4)
-                for (const key in endpoints){
-                    let properties = Object.keys(endpoints[key]);
-                    // Expect the first property of each endpoint to be its description
-                    expect(properties[0]).toBe('description');
-                };
+                const endpointsObj = response.body;
+                const endpoints = Object.keys(endpointsObj)
+                const numOfEndpoints = endpoints.length;
+
+                // Responds with an object
+                expect(endpointsObj).toBeObject();
+                // Returned object contains all endpoints
+                expect(endpoints).toHaveLength(numOfEndpoints);
+                // For each endpoint:
+                for(const endpoint in endpointsObj){
+                    // Access all properties of endpoint
+                    let endpointProperties = endpointsObj[endpoint]
+                    // All endpoints have properties 'description', 'queries' and 'exampleResponse'
+                    expect(endpointProperties).toHaveProperty('description')
+                    expect(endpointProperties).toHaveProperty('queries')
+                    expect(endpointProperties).toHaveProperty('exampleResponse')
+                }
             });
     });
 });
 
-// !!! ADD ERROR TESTS LATER !!!
 describe('GET /api/topics', () => {
     it('gets all topics', () => {
         return request(app).get('/api/topics')
+        // Is available on endpoint /api/topics
             .expect(200)
             .then((response) => {
                 const topics = response.body.topics;
+                // Gets all topics
                 expect(topics).toHaveLength(3);
+                // For each topic:
                 topics.forEach((topic) => {
+                    // Each topic has 'slug' and 'description' properties
                     expect(topic).toHaveProperty('slug');
                     expect(topic).toHaveProperty('description');
                 });
-            })
-    })
+            });
+    });
 });
 
-// !!! ADD ERROR TESTS LATER !!!
 describe('GET /api/articles', () => {
     it('gets all articles', () => {
         return request(app).get('/api/articles')
+        // Is available on endpoint /api/articles
             .expect(200).then((response) => {
-            const articles = response.body.articles
-            expect(articles).toHaveLength(13)
+            const articles = response.body.articles;
+            // Gets all articles
+            expect(articles).toHaveLength(13);
+            // Contains necessary properties
+            articles.forEach((article) => {
+                expect(article).toHaveProperty('article_id');
+                expect(article).toHaveProperty('title');
+                expect(article).toHaveProperty('topic');
+                expect(article).toHaveProperty('author');
+                expect(article).toHaveProperty('created_at');
+                expect(article).toHaveProperty('votes');
+                expect(article).toHaveProperty('article_img_url');
+                // expect(article).toHaveProperty('comment_count');
+                // Does not contain the 'body' property
+                expect(article).not.toHaveProperty('body');
+            });
         });
-    });
-    it('does not return the body property for any articles', () => {
-        return request(app).get('/api/articles')
-        .expect(200).then((response) => {
-            const articles = response.body
-            expect(articles).not.toHaveProperty('body');
-        })
     });
 });
 
-// !!! ADD ERROR TESTS LATER !!!
 describe('GET /api/articles/:article_id', () => {
     it('gets an article by its id', () => {
         return request(app).get('/api/articles/1')
+        // Available on /api/articles/1
             .expect(200).then((response) => {
-            const article = response.body
-            console.log(article)
+            const article = response.body.article
+            // Article has an ID
+            expect(article).toHaveProperty('article_id')
+            // Returned article has the same ID as request
+            expect(article.article_id).toBe(1)
+            // Article contains all properties
+            expect(article).toHaveProperty('article_id');
+            expect(article).toHaveProperty('title');
+            expect(article).toHaveProperty('topic');
+            expect(article).toHaveProperty('author');
+            expect(article).toHaveProperty('body');
+            expect(article).toHaveProperty('created_at');
+            expect(article).toHaveProperty('votes');
+            expect(article).toHaveProperty('article_img_url');
         });
+    });
+    test('status: 404, responds with an error message when passed a valid article ID that does not exist in the database', () => {
+        return request(app)
+            .get("/api/articles/99999")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.message).toEqual('No article found for article_id: 99999')
+            });
+    });
+    test('status: 400, responds with an error message when passed an invalid article ID', () => {
+        return request(app)
+            .get('/api/articles/notAnId')
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad Request!')
+            });
     });
 });
 
