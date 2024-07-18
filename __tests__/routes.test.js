@@ -46,9 +46,16 @@ describe('GET /api/articles', () => {
     it('gets all articles', () => {
         return request(app).get('/api/articles')
             .expect(200).then((response) => {
-            const articles = response.body
-            console.log(articles)
+            const articles = response.body.articles
+            expect(articles).toHaveLength(13)
         });
+    });
+    it('does not return the body property for any articles', () => {
+        return request(app).get('/api/articles')
+        .expect(200).then((response) => {
+            const articles = response.body
+            expect(articles).not.toHaveProperty('body');
+        })
     });
 });
 
