@@ -62,7 +62,7 @@ describe('GET /api/articles', () => {
             // Gets all articles
             expect(articles).toHaveLength(13);
             // Sorted in descending order by creation date
-            expect(articles).toBeSortedBy('created_at', { descending : true })
+            expect(articles).toBeSortedBy('created_at', { descending : true });
             // Contains necessary properties
             articles.forEach((article) => {
                 expect(article).toHaveProperty('article_id');
@@ -85,11 +85,11 @@ describe('GET /api/articles/:article_id', () => {
         return request(app).get('/api/articles/1')
         // Available on /api/articles/1
             .expect(200).then((response) => {
-            const article = response.body.article
+            const article = response.body.article;
             // Article has an ID
-            expect(article).toHaveProperty('article_id')
+            expect(article).toHaveProperty('article_id');
             // Returned article has the same ID as request
-            expect(article.article_id).toBe(1)
+            expect(article.article_id).toBe(1);
             // Article contains all properties
             expect(article).toHaveProperty('article_id');
             expect(article).toHaveProperty('title');
@@ -102,30 +102,63 @@ describe('GET /api/articles/:article_id', () => {
         });
     });
     test('status: 404, responds with an error message when passed a valid article ID that does not exist in the database', () => {
-        return request(app)
-            .get("/api/articles/99999")
+        return request(app).get("/api/articles/99999")
             .expect(404)
             .then(({ body }) => {
-                expect(body.message).toEqual('No article found for article_id: 99999')
+                expect(body.message).toEqual('No article found for article_id: 99999');
             });
     });
     test('status: 400, responds with an error message when passed an invalid article ID', () => {
-        return request(app)
-            .get('/api/articles/notAnId')
+        return request(app).get('/api/articles/notAnId')
             .expect(400)
             .then(({ body }) => {
-                expect(body.message).toEqual('Bad Request!')
+                expect(body.message).toEqual('Bad Request!');
             });
     });
 });
 
 // Ticket 6 //
-// status 200: array of comments
-// status 200: valid id with no comments (empty array)
-// status 400: invalid id
-// status 404: nonexistent id
-// length
-// properties
-
+describe('GET /api/articles/:article_id/comments', () => {
+    it('responds with an array of comments for the given article_id', () => {
+        return request(app).get('/api/articles/1/comments')
+        //Is available on /api/articles/:article_id/comments
+            .expect(200).then((response) => {
+                const comments = response.body.comments;
+                // Response is an array
+                expect(comments).toBeArray();
+                // Array contains 8 comments
+                expect(comments).toHaveLength(11);
+                // Array served with most recent comment first
+                expect(comments).toBeSortedBy('created_at', { descending : true });
+                // Each comment has the correct properties
+                comments.forEach((comment) => {
+                    expect(comment).toHaveProperty('comment_id');
+                    expect(comment).toHaveProperty('votes');
+                    expect(comment).toHaveProperty('created_at');
+                    expect(comment).toHaveProperty('author');
+                    expect(comment).toHaveProperty('body');
+                    expect(comment).toHaveProperty('article_id');
+                });
+            });
+    });
+    test('status 200: returns an empty array when given a valid ID with no comments', () => {
+        return request(app).get("/api/articles/39/comments")
+            .expect(200)
+            .then((response) => {
+                const comments = response.body.comments;
+                // Response is an array
+                expect(comments).toBeArray();
+                // Response array is empty
+                expect(comments).toHaveLength(0);
+            });
+    });
+    test('status 400: responds with an error message when passed an invalid ID', () => {
+        return request(app).get("/api/articles/notAnId/comments")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad Request!');
+            });
+    });
+});
 
 afterAll(() => db.end());
