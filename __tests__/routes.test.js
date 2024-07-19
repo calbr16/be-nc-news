@@ -61,6 +61,8 @@ describe('GET /api/articles', () => {
             const articles = response.body.articles;
             // Gets all articles
             expect(articles).toHaveLength(13);
+            // Sorted in descending order by creation date
+            expect(articles).toBeSortedBy('created_at', { descending : true })
             // Contains necessary properties
             articles.forEach((article) => {
                 expect(article).toHaveProperty('article_id');
@@ -70,7 +72,7 @@ describe('GET /api/articles', () => {
                 expect(article).toHaveProperty('created_at');
                 expect(article).toHaveProperty('votes');
                 expect(article).toHaveProperty('article_img_url');
-                // expect(article).toHaveProperty('comment_count');
+                expect(article).toHaveProperty('comment_count');
                 // Does not contain the 'body' property
                 expect(article).not.toHaveProperty('body');
             });
@@ -116,5 +118,14 @@ describe('GET /api/articles/:article_id', () => {
             });
     });
 });
+
+// Ticket 6 //
+// status 200: array of comments
+// status 200: valid id with no comments (empty array)
+// status 400: invalid id
+// status 404: nonexistent id
+// length
+// properties
+
 
 afterAll(() => db.end());
