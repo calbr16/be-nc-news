@@ -1,4 +1,4 @@
-const { getArticles, getArticleById, getArticleComments } = require('../models/article-models.js')
+const { getArticles, getArticleById } = require('../models/article-models.js')
 
 exports.fetchArticles = (request, response, next) => {
     return getArticles().then((articles) => {
