@@ -25,3 +25,11 @@ exports.getArticleById = (article_id) => {
     });
 };
 
+exports.getArticleComments = (article_id) => {
+    return db
+        .query('SELECT * FROM comments WHERE comments.article_id=$1 ORDER BY created_at DESC;', [article_id])
+        .then(({ rows }) => {
+            const comments = rows;
+            return comments;
+        });
+};

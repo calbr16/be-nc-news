@@ -10,6 +10,7 @@ apiRouter.get("/", (request, response) => {
 apiRouter.use("/topics", topicsRouter);
 apiRouter.use("/articles", articlesRouter);
 apiRouter.use("/articles/:article_id", articlesRouter);
+apiRouter.use("/articles/:article_id/comments", articlesRouter);
 
 apiRouter.use((error, request, response, next) => { 
   if (error.status && error.message) {
