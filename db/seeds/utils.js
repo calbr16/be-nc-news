@@ -1,3 +1,5 @@
+const db = require("../connection.js");
+
 exports.convertTimestampToDate = ({ created_at, ...otherProperties }) => {
   if (!created_at) return { ...otherProperties };
   return { created_at: new Date(created_at), ...otherProperties };
@@ -20,3 +22,21 @@ exports.formatComments = (comments, idLookup) => {
     };
   });
 };
+
+exports.checkArticleExists = (article_id) => {
+  return db
+    .query('SELECT * FROM articles WHERE article_id = $1;', [article_id])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return false
+      } else return true;
+    });
+  };
+
+  exports.checkUserExists = (username) => {
+    return db
+      .query('SELECT * FROM users WHERE username = $1;', [username])
+      .then(({ rows }) => {
+        return (rows.length>0);
+      });
+  };

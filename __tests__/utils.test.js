@@ -2,6 +2,8 @@ const {
   convertTimestampToDate,
   createRef,
   formatComments,
+  checkArticleExists,
+  checkUserExists,
 } = require("../db/seeds/utils");
 
 describe("convertTimestampToDate", () => {
@@ -100,5 +102,35 @@ describe("formatComments", () => {
     const comments = [{ created_at: timestamp }];
     const formattedComments = formatComments(comments, {});
     expect(formattedComments[0].created_at).toEqual(new Date(timestamp));
+  });
+});
+
+describe('checkArticleExists', () => {
+  test('returns true if article_id exists', () => {
+    return checkArticleExists(1)
+      .then((ifExists) => {
+        expect(ifExists).toBe(true);
+      });
+  });
+  test('returns false if article_id does not exist', () => {
+    return checkArticleExists(99999)
+      .then((ifExists) => {
+        expect(ifExists).toBe(false);
+      });
+  });
+});
+
+describe('checkUserExists', () => {
+  test('returns true if username exists', () => {
+    return checkUserExists('icellusedkars')
+      .then((ifExists) => {
+        expect(ifExists).toBe(true);
+    });
+  });
+  test('returns false if username does not exist', () => {
+    return checkUserExists('fakeUser')
+      .then((ifExists) => {
+        expect(ifExists).toBe(false);
+      });
   });
 });

@@ -1,5 +1,5 @@
 const db = require('../db/connection.js');
-const articles = require('../db/data/test-data/articles.js');
+const { checkArticleExists } = require('../db/seeds/utils.js');
 
 exports.getArticles = (request, response) => {
     return db
@@ -18,18 +18,25 @@ exports.getArticleById = (article_id) => {
         if (!article) {
             return Promise.reject({
                 status: 404,
-                message: `No article found for article_id: ${article_id}`,
+                message: `No article found for article_id: ${article_id}`
             });
         } 
         return article;
     });
 };
 
-exports.getArticleComments = (article_id) => {
-    return db
-        .query('SELECT * FROM comments WHERE comments.article_id=$1 ORDER BY created_at DESC;', [article_id])
+exports.updateArticleById = (article_id, inc_votes) => {
+    return checkArticleExists(article_id)
+        .then(() => {
+            return db
+                .query('UPDATE articles SET votes=votes+$1 WHERE article_id=$2 RETURNING *;', [inc_votes, article_id])
+        })
         .then(({ rows }) => {
-            const comments = rows;
-            return comments;
+            if (!rows.length) {
+                return Promise.reject({
+                    status: 404,
+                    message: `No article with ID ${article_id}`
+                })
+            } return rows[0];
         });
 };

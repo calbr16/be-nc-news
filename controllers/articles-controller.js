@@ -1,5 +1,4 @@
-const articles = require('../db/data/test-data/articles.js');
-const { getArticles, getArticleById, getArticleComments } = require('../models/article-models.js')
+const { getArticles, getArticleById, updateArticleById } = require('../models/article-models.js')
 
 exports.fetchArticles = (request, response, next) => {
     return getArticles().then((articles) => {
@@ -16,10 +15,11 @@ exports.fetchArticleById = (request, response, next) => {
     .catch(next);
 };
 
-exports.fetchArticleComments = (request, response, next) => {
-    const { article_id } = request.params
-    return getArticleComments(article_id).then((comments) => { 
-        response.status(200).send({ comments });
+exports.updateArticle = (request, response, next) => {
+    const { article_id } = request.params;
+    const { inc_votes } = request.body;
+    return updateArticleById(article_id, inc_votes).then((updatedArticle) => {
+        response.status(200).send({ article: updatedArticle });
     })
-    .catch(next)
+    .catch(next);
 };
