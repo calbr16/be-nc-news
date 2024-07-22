@@ -1,8 +1,12 @@
-const request = require("supertest");
-const app = require("../app.js");
+const request = require('supertest');
+const app = require('../app.js');
 const db = require('../db/connection.js');
 const seed = require('../db/seeds/seed.js');
 const testData = require('../db/data/test-data/index.js');
+const { addArticleComment } = require('../controllers/articles-controller.js');
+const { insertArticleComment, addComment } = require('../models/article-models.js');
+const { fetchArticleComments } = require('../controllers/comments-controller.js');
+
 
 beforeEach(() => {
     return seed(testData);
@@ -102,7 +106,7 @@ describe('GET /api/articles/:article_id', () => {
         });
     });
     test('status: 404, responds with an error message when passed a valid article ID that does not exist in the database', () => {
-        return request(app).get("/api/articles/99999")
+        return request(app).get('/api/articles/99999')
             .expect(404)
             .then(({ body }) => {
                 expect(body.message).toEqual('No article found for article_id: 99999');
@@ -140,9 +144,17 @@ describe('GET /api/articles/:article_id/comments', () => {
                     expect(comment).toHaveProperty('article_id');
                 });
             });
+        });
+        test('status: 404, responds with an error message when passed a valid article ID that does not exist in the database', () => {
+                return request(app).get('/api/articles/99999')
+                    .expect(404)
+                    .then(({ body }) => {
+                        expect(body.message).toEqual('No article found for article_id: 99999');
+                    });
+            });
     });
     test('status 200: returns an empty array when given a valid ID with no comments', () => {
-        return request(app).get("/api/articles/39/comments")
+        return request(app).get('/api/articles/39/comments')
             .expect(200)
             .then((response) => {
                 const comments = response.body.comments;
@@ -153,10 +165,188 @@ describe('GET /api/articles/:article_id/comments', () => {
             });
     });
     test('status 400: responds with an error message when passed an invalid ID', () => {
-        return request(app).get("/api/articles/notAnId/comments")
+        return request(app).get('/api/articles/notAnId/comments')
             .expect(400)
             .then(({ body }) => {
                 expect(body.message).toEqual('Bad Request!');
+            });
+    });
+
+describe.only('POST api/articles/:article_id/comments', () => {
+    it('status 201: responds with the new comment', () => {
+        const newComment = {
+            username: "icellusedkars",
+            body: "I love coding!"
+        };
+
+        return request(app).post('/api/articles/1/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                const comment = body.comment
+                expect(comment).toEqual({
+                    comment_id: expect.any(Number),
+                    body: "I love coding!",
+                    article_id: 1,
+                    author: "icellusedkars",
+                    votes: 0,
+                    created_at: expect.any(String),
+                });
+            });
+    })
+    test('status 201: ignores unnecessary properties', () => {
+        const newComment = {
+            username: "icellusedkars",
+            body: "I love coding!",
+            irrelevant: "please ignore me"
+        };
+
+        return request(app).post('/api/articles/1/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                const comment = body.comment
+                expect(comment).toEqual({
+                    comment_id: expect.any(Number),
+                    body: "I love coding!",
+                    article_id: 1,
+                    author: "icellusedkars",
+                    votes: 0,
+                    created_at: expect.any(String),
+                });
+            });
+    })
+    test('status 400: responds with an error when passed an invalid ID', () => {
+        const newComment = {
+            username: "icellusedkars",
+            body: "I love coding!",
+        };
+
+        return request(app).post('/api/articles/notAnId/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad Request!');
+            });
+    });
+    test('status: 404, responds with an error message when passed a valid article ID that does not exist in the database', () => {
+        const newComment = {
+            username: "icellusedkars",
+            body: "I love coding!",
+        };
+
+        return request(app).post('/api/articles/99999/comments')
+            .send(newComment)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.message).toEqual('No article with ID 99999');
+            });
+    });
+    test('status: 400, responds with an error message when missing username', () => {
+        const newComment = {
+            body: "I love coding!",
+        };
+
+        return request(app).post('/api/articles/1/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad request!');
+            });
+    });
+    test('status: 400, responds with an error message when missing body', () => {
+        const newComment = {
+            username: "icellusedkars"
+        };
+
+        return request(app).post('/api/articles/1/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad request!');
+            });
+    });
+    test('status: 404, username does not exist', () => {
+        const newComment = {
+            username: "stranger",
+            body: "who am i?"
+        };
+
+        return request(app).post('/api/articles/1/comments')
+            .send(newComment)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.message).toEqual('No user with username stranger')
+            });
+    });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+    test("Status 200: responds with the updated article", () => {
+        const votes = { inc_votes: 1 }
+
+        return request(app)
+            .patch("/api/articles/1")
+            .send(votes)
+            .expect(200)
+            .then(({ body }) => {
+                const article = body.article
+                expect(article).toEqual({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    body: "I find this existence challenging",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    created_at: expect.any(String),
+                    votes: 101,
+                    article_img_urk: expect.any(String)
+                });
+            });
+    });
+    test('status 400: responds with an error when passed an invalid ID', () => {
+        const votes = { inc_votes: 1 }
+        return request(app).patch('/api/articles/notAnId')
+            .send(votes)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad Request!');
+            });
+    });
+    test('status: 404, responds with an error message when passed a valid article ID that does not exist in the database', () => {
+        const votes = { inc_votes: 1 }
+
+        return request(app).patch('/api/articles/99999')
+            .send(votes)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.message).toEqual('No article with ID 99999');
+            });
+    });
+    test('status: 400, responds with an error message when the body is incorrect', () => {
+        const votes = { inc_votes: 'notANumber'}
+
+        return request(app).patch('/api/articles/1')
+            .send(votes)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Bad request!');
+            });
+    });
+});
+
+describe('GET /api/users', () => {
+    test('status: 200, responds with an array of user objects', () => {
+        return request(app)
+            .get("/api/users")
+            .expect(200)
+            .then(({ body }) => {
+                const allUsers = body.users;
+                expect(Array.isArray(allUsers)).toBe(true);
+                for(const user in allUsers){
+                    expect(user).toHaveProperty('username');
+                    expect(user).toHaveProperty('name');
+                    expect(user).toHaveProperty('avatar_url');
+                };
             });
     });
 });

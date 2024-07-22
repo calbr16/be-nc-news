@@ -1,18 +1,22 @@
-const { fetchArticles, fetchArticleById, fetchArticleComments } = require("../controllers/articles-controller");
+const { fetchArticles, fetchArticleById, updateArticle } = require('../controllers/articles-controller.js');
 
-const articlesRouter = require("express").Router();
+const { fetchArticleComments, postArticleComment } = require('../controllers/comments-controller.js');
+
+const articlesRouter = require('express').Router();
 
 articlesRouter
-    .route("/")
+    .route('/')
     .get(fetchArticles);
 
 articlesRouter
-    .route("/:article_id")
-    .get(fetchArticleById);
+    .route('/:article_id')
+    .get(fetchArticleById)
+    .patch(updateArticle);
 
 articlesRouter
-    .route("/:article_id/comments")
-    .get(fetchArticleComments);
-
+    .route('/:article_id/comments')
+    .get(fetchArticleComments)
+    .post(postArticleComment);
+    
 
 module.exports = articlesRouter;

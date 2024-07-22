@@ -7,7 +7,7 @@ exports.getAllTopics = () => {
         if (!topics) {
             return Promise.reject({
                 status: 404,
-                message: 'Invalid endpoint!',
+                message: 'Invalid endpoint!'
             });
         };
         return topics;
